@@ -279,11 +279,180 @@ with tab_solution:
 
     with tab2:
 
-        st.markdown("""#### 🦶 Footprint and Biocapacity""")
+        st.markdown("""### 🦶 Footprint and Biocapacity""")
+
+        # Load the dataset
+        url = "https://raw.githubusercontent.com/holtzy/The-Python-Graph-Gallery/master/static/data/footprint.csv"
+        df_footprint = pd.read_csv(url)
+
+        # Buttons to select charts
+        selected_chart = st.radio(
+            "Select a chart to display:",
+            (
+                "Population by Region",
+                "Average Footprint by Region",
+                "Footprint vs Biocapacity",
+                "Top Countries by Earths Required",
+                "Bubble Chart: Footprint vs Biocapacity with Population",
+            ),
+        )
+
+        # 1. Bar Chart: Population by Region
+        if selected_chart == "Population by Region":
+            population_by_region = df_footprint.groupby("region")["populationMillions"].sum()
+            fig1, ax1 = plt.subplots(figsize=(5, 3))
+            ax1.bar(population_by_region.index, population_by_region.values, color="skyblue", edgecolor="black")
+            ax1.set_title("Population by Region")
+            ax1.set_xlabel("Region")
+            ax1.set_ylabel("Population (Millions)")
+            ax1.tick_params(axis="x", rotation=45)
+            st.pyplot(fig1, use_container_width=False)
+
+        # 2. Pie Chart: Average Footprint by Region
+        elif selected_chart == "Average Footprint by Region":
+            avg_footprint = df_footprint.groupby("region")["footprint"].mean()
+            fig2, ax2 = plt.subplots(figsize=(5, 3))
+            ax2.pie(
+                avg_footprint,
+                labels=avg_footprint.index,
+                autopct="%1.1f%%",
+                startangle=90,
+                colors=plt.cm.Paired(np.linspace(0, 1, len(avg_footprint))),
+            )
+            ax2.set_title("Average Footprint by Region")
+            st.pyplot(fig2, use_container_width=False)
+
+        # 3. Scatter Plot: Footprint vs Biocapacity
+        elif selected_chart == "Footprint vs Biocapacity":
+            fig3, ax3 = plt.subplots(figsize=(5, 3))
+            ax3.scatter(df_footprint["footprint"], df_footprint["biocapacity"], alpha=0.7, c="orange", edgecolor="black")
+            ax3.set_title("Footprint vs Biocapacity")
+            ax3.set_xlabel("Footprint (Global Hectares per Person)")
+            ax3.set_ylabel("Biocapacity (Global Hectares per Person)")
+            st.pyplot(fig3, use_container_width=False)
+
+        # 4. Horizontal Bar Chart: Top Countries by Earths Required
+        elif selected_chart == "Top Countries by Earths Required":
+            top_countries = df_footprint.sort_values("earthsRequired", ascending=False).head(10)
+            fig4, ax4 = plt.subplots(figsize=(5, 3))
+            ax4.barh(top_countries["country"], top_countries["earthsRequired"], color="green", edgecolor="black")
+            ax4.set_title("Top Countries by Earths Required")
+            ax4.set_xlabel("Earths Required")
+            ax4.set_ylabel("Country")
+            st.pyplot(fig4, use_container_width=False)
+
+        # 5. Bubble Chart: Footprint vs Biocapacity with Population
+        elif selected_chart == "Bubble Chart: Footprint vs Biocapacity with Population":
+            fig5, ax5 = plt.subplots(figsize=(7, 5))
+            scatter = ax5.scatter(
+                df_footprint["footprint"],
+                df_footprint["biocapacity"],
+                s=df_footprint["populationMillions"] * 10,  # Bubble size proportional to population
+                alpha=0.6,
+                c=np.random.rand(len(df_footprint)),  # Random colors for fun
+                cmap="viridis",
+                edgecolors="black"
+            )
+            ax5.set_title("Bubble Chart: Footprint vs Biocapacity")
+            ax5.set_xlabel("Footprint (Global Hectares per Person)")
+            ax5.set_ylabel("Biocapacity (Global Hectares per Person)")
+            ax5.grid(True, linestyle="--", alpha=0.5)
+
+            # Annotating the top 5 countries by population
+            top_countries = df_footprint.sort_values("populationMillions", ascending=False).head(5)
+            for _, row in top_countries.iterrows():
+                ax5.text(
+                    row["footprint"],
+                    row["biocapacity"],
+                    row["country"],
+                    fontsize=8,
+                    ha="center",
+                    va="center",
+                    bbox=dict(facecolor="white", alpha=0.6, edgecolor="black", boxstyle="round"),
+                )
+
+            st.pyplot(fig5, use_container_width=False)
 
 
     with tab3: 
-        st.markdown("""#### 🏎️ Mario Kart World Records per Track""")
+        # Load the dataset
+        url = "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-05-25/records.csv"
+        df_mario = pd.read_csv(url)
+
+        # Page Layout
+        st.markdown("### 🏎️ Mario Kart World Records per Track")
+
+        # Chart selection
+        selected_chart = st.radio(
+            "Select a chart to display:",
+            (
+                "Fastest Tracks",
+                "Records by Track Type",
+                "Top Players",
+                "Shortcut vs Non-Shortcut Times",
+                "Lap vs Full Race Distribution",
+            ),
+        )
+
+        # 1. Fastest Tracks: Horizontal Bar Chart
+        if selected_chart == "Fastest Tracks":
+            fastest_tracks = df_mario.groupby("track")["time"].min().sort_values()
+            fig1, ax1 = plt.subplots(figsize=(7, 5))
+            ax1.barh(fastest_tracks.index, fastest_tracks.values, color="limegreen", edgecolor="black")
+            ax1.set_title("Fastest Tracks in Mario Kart")
+            ax1.set_xlabel("Time (seconds)")
+            ax1.set_ylabel("Track")
+            st.pyplot(fig1, use_container_width=False)
+
+        # 2. Records by Track Type: Pie Chart
+        elif selected_chart == "Records by Track Type":
+            type_counts = df_mario["type"].value_counts()
+            fig2, ax2 = plt.subplots(figsize=(5, 3))
+            ax2.pie(
+                type_counts,
+                labels=type_counts.index,
+                autopct="%1.1f%%",
+                startangle=140,
+                colors=["#FFD700", "#1E90FF"],
+            )
+            ax2.set_title("📊 Records by Track Type")
+            st.pyplot(fig2, use_container_width=False)
+
+        # 3. Top Players: Bar Chart
+        elif selected_chart == "Top Players":
+            top_players = df_mario["player"].value_counts().head(10)
+            fig3, ax3 = plt.subplots(figsize=(7, 4))
+            ax3.bar(top_players.index, top_players.values, color="orange", edgecolor="black")
+            ax3.set_title("Top Players by Record Count")
+            ax3.set_xlabel("Player")
+            ax3.set_ylabel("Number of Records")
+            ax3.tick_params(axis="x", rotation=45)
+            st.pyplot(fig3, use_container_width=False)
+
+        # 4. Shortcut vs Non-Shortcut Times: Box Plot
+        elif selected_chart == "Shortcut vs Non-Shortcut Times":
+            fig4, ax4 = plt.subplots(figsize=(6, 4))
+            df_mario["shortcut"] = df_mario["shortcut"].map({"Yes": "Shortcut", "No": "No Shortcut"})
+            df_mario.boxplot(column="time", by="shortcut", ax=ax4, grid=False, notch=True, patch_artist=True)
+            ax4.set_title("Shortcut vs Non-Shortcut Times")
+            ax4.set_xlabel("Type")
+            ax4.set_ylabel("Time (seconds)")
+            ax4.grid(axis="y")
+            fig4.suptitle("")  # Removes default title
+            st.pyplot(fig4, use_container_width=False)
+
+        # 5. Lap vs Full Race Distribution: Histogram
+        elif selected_chart == "Lap vs Full Race Distribution":
+            fig5, ax5 = plt.subplots(figsize=(7, 4))
+            df_mario["type"].replace({"Three Lap": "Full Race", "One Lap": "Single Lap"}, inplace=True)
+            for t in df_mario["type"].unique():
+                subset = df_mario[df_mario["type"] == t]
+                ax5.hist(subset["time"], bins=20, alpha=0.7, label=t)
+            ax5.set_title("Lap vs Full Race Distribution")
+            ax5.set_xlabel("Time (seconds)")
+            ax5.set_ylabel("Frequency")
+            ax5.legend()
+            st.pyplot(fig5, use_container_width=False)
 
 
 css = '''
