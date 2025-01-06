@@ -415,7 +415,7 @@ with tab_solution:
                 startangle=140,
                 colors=["#FFD700", "#1E90FF"],
             )
-            ax2.set_title("📊 Records by Track Type")
+            ax2.set_title("Records by Track Type")
             st.pyplot(fig2, use_container_width=False)
 
         # 3. Top Players: Bar Chart
