@@ -1,9 +1,17 @@
-# 🎨 Matplotlib Journey
+import streamlit as st
 
+st.set_page_config(
+    page_title="Matplotlib Journey",
+    page_icon="🎨",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
+st.markdown("# 🎨 Matplotlib Journey")
+st.image("images/logo2.png", width=400)
 
-<img src="images/logo2.png" alt="icon" width="400" align="center">
-
+st.markdown(
+    """
 
 🌟 **Become the Matplotlib Visualization Expert** 🌟  
 
@@ -29,7 +37,10 @@ Wrap up the course with **Your Project** to apply everything you've learned.
 
 🎁 **Bonus**: An extra section with in-depth articles to keep learning beyond the course.
 
-
 > 🔑 **Note**: 
 > * This repository is designed to host the projects from the course [matplotlib-journey.com](https://www.matplotlib-journey.com/). 
 > * This repository are developed by [Francisco Alfaro](https://github.com/fralfaro) and [Valeska Canales](https://github.com/vcanalesp).
+"""
+)
+
+
