@@ -1,5 +1,6 @@
 # 🎨 Matplotlib Journey
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://matplotlib-journey-projects.streamlit.app/)
 
 
 <img src="images/logo2.png" alt="icon" width="400" align="center">
