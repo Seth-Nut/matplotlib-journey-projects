@@ -43,4 +43,24 @@ Wrap up the course with **Your Project** to apply everything you've learned.
 """
 )
 
+css = '''
+    <style>
+        /* Ajusta el tamaño del texto en las pestañas (Tabs) */
+        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+            font-size: 1.5rem; /* Tamaño del texto en las pestañas */
+        }
 
+        /* Opción adicional: Ajusta el tamaño de los encabezados dentro de los expanders */
+        .st-expander h1, .st-expander h2, .st-expander h3 {
+            font-size: 4rem; /* Tamaño de los encabezados dentro de los expanders */
+        }
+
+        /* Ajustar el tamaño del texto del selectbox en el sidebar */
+        .sidebar .stSelectbox label {
+            font-size: 1.5rem; /* Ajusta este valor para cambiar el tamaño del texto */
+        }
+
+    </style>
+    '''
+
+st.markdown(css, unsafe_allow_html=True)

@@ -31,6 +31,9 @@ with tab_project:
     To do this, you'll choose from multiple datasets and create charts to visualize them.
 
     ### 💾 Datasets
+                
+    All datasets can be found [here](https://github.com/JosephBARBIERDARNAL/data-matplotlib-journey).
+
 
     """)
 
@@ -44,7 +47,7 @@ with tab_project:
 
     #### 💨 Frequency of Different Kinds of Storms
 
-    **Description:** 
+    ##### Description: 
 
     This dataset comes from the National Oceanic and Atmospheric Administration (NOAA), [an agency that enriches life through science](https://www.noaa.gov/about-our-agency).
 
@@ -54,7 +57,7 @@ with tab_project:
     - `status`: The type of storm (e.g., hurricane, tropical depression).
     - `n`: The number of storms that occurred.
 
-    **Import**::
+    ##### Import:
 
 
     ```python
@@ -66,7 +69,7 @@ with tab_project:
     ```
 
 
-    **Preview**:
+    ##### Preview: 
 
     | year | status              | n     |
     |------|---------------------|-------|
@@ -88,7 +91,7 @@ with tab_project:
 
     #### 🦶 Footprint and Biocapacity
 
-    **Description:**  
+    ##### Description:
 
     This dataset comes from the Global Footprint Network, [an international nonprofit organization](https://www.footprintnetwork.org/about-us/).  
 
@@ -101,7 +104,7 @@ with tab_project:
     - `biocapacity`: The biocapacity of the country, representing global hectares per person.  
     - `earthsRequired`: The number of Earths required to sustain the current consumption levels if everyone lived like the average resident of the country.
 
-    **Import**:
+    ##### Import:
 
     ```python
     import pandas as pd
@@ -111,7 +114,7 @@ with tab_project:
     df_footprint = pd.read_csv(open_url(url))
     ```
 
-    **Preview**:
+    ##### Preview: 
 
     | country   | region          | populationMillions | footprint | biocapacity | earthsRequired |
     |-----------|-----------------|---------------------|-----------|-------------|----------------|
@@ -129,7 +132,7 @@ with tab_project:
 
     #### 🏎️ Mario Kart World Records per Track
 
-    **Description:**  
+    ##### Description:  
 
     The data originates from the [Mario Kart World Records site](https://mkwrs.com/) and was highlighted as part of the Tidytuesday challenge in 2021.
 
@@ -147,7 +150,7 @@ with tab_project:
     - `player`: Name of the player.  
     - `record_duration`: Duration of the record in days.  
 
-    **Import**:
+    ##### Import:
 
     ```python
     import pandas as pd
@@ -157,7 +160,7 @@ with tab_project:
     df_mario = pd.read_csv(open_url(url))
     ```
 
-    **Preview**:
+    ##### Preview:
 
     | track           | type          | shortcut | player      | system | date       | time   | record_duration |
     |------------------|---------------|----------|-------------|--------|------------|--------|-----------------|
