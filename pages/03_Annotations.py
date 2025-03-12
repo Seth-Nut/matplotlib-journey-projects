@@ -1,7 +1,10 @@
 # 03 Annotations
-
-
 import streamlit as st
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from highlight_text import ax_text
+from drawarrow import ax_arrow
 
 st.set_page_config(
     page_title="Annotations",
@@ -169,23 +172,276 @@ df = pd.read_csv(open_url(url))
 
 
         """)
+            
+    st.markdown("### 🎮 Your Turn!")
+
+    # 1. Reproduce a chart 
+    with st.expander("Reproduce a Chart"):
+        st.markdown("""
+        **Dataset:** Economic Measures 
+                    
+        **Instructions:**      
+        - The color for the USA is **#ae2f2f** and for Japan it's **#44487e**. Background color is **#fffaf4** and other colors are either black or nuances of this lightgrey: **#b9b9b9**
+        - Outside of this, there's nothing magic to do here. Always keep in mind that there are multiple ways to do the same thing with matplotlib.
+        - As long as your solution looks like the goal, you're good to go!
+        """)
+
+    # 2. Reproduce another chart 
+    with st.expander("Reproduce Another Chart"):
+        st.markdown("""
+        **Dataset:** Economic Measures 
+                    
+        **Instructions:** 
+                    
+        - Background color is **#3f3f3f** and the dots are in **#a2a2bf**. Other colors are either white or gray/lightgray.
+        """)
+
+    # 3. Improve a chart
+    with st.expander("Improve a Chart"):
+        st.markdown("""
+        *(Complete details here)*
+        """)
+
+    # 4. Improve another chart
+    with st.expander("Improve Another Chart"):
+        st.markdown("""
+        *(Complete details here)*
+        """)
 
 
 with tab_solution:
     st.markdown("""## Solution""")
-    # Tab menu
-    tab1, tab2, tab3 = st.tabs(
-        ["Video games", "Economic Measures", "Netflix Movies"] 
-    )
-    with tab1:
-        st.markdown("""
-        """)
-    with tab2:
-        st.markdown("""
-        """)
-    with tab3:
-        st.markdown("""
-        """)
+
+    # 1. Reproduce a chart 
+    with st.expander("Reproduce a Chart"):
+        # Load the data
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/economic/economic.csv"
+        df = pd.read_csv(url)
+
+        # Calculate max unemployment rate for the USA
+        max_usa = df.loc[df["country"] == "united states", "unemployment rate"].max()
+
+        # Define colors
+        us_color = "#ae2f2f"
+        japan_color = "#44487e"
+
+        # Create the figure and axis
+        fig, ax = plt.subplots()
+        fig.subplots_adjust(hspace=1)
+        ax.spines[["top", "right", "left", "bottom"]].set_visible(False)
+        ax.set_facecolor("#fffaf4")
+        fig.set_facecolor("#fffaf4")
+        ax.tick_params(size=0)
+        ax.set_xticks([])
+        ax.set_ylim(0, 15.5)
+        ax.grid(axis="y", color="#dfdfdf", linewidth=0.4, zorder=2)
+
+        # Plot the data for each country
+        for country in df["country"].unique():
+            subset = df[df["country"] == country]
+            x = subset["date"]
+            y = subset["unemployment rate"]
+
+            if country == "united states":
+                style = dict(color=us_color, zorder=10, lw=2.2)
+            elif country == "japan":
+                style = dict(color=japan_color, zorder=10, lw=2.2)
+            else:
+                style = dict(color="#b6b5b5", zorder=4, lw=0.8)
+            ax.plot(x, y, **style)
+
+        # Add custom text annotations
+        text_style = dict(y=-0.8, ha="center", size=7, color="#b4b4b4")
+        ax.text(x="2020-01-01", s="Jan 2020", **text_style)
+        ax.text(x="2023-12-01", s="Dec 2023", **text_style)
+
+        # Highlighted annotations using highlight_text
+        ax_text(
+            x="2020-07-01",
+            y=13.7,
+            s=f"The <USA> had a peak unemployment\nrate of <{max_usa}%> in April 2020.",
+            highlight_textprops=[{"color": us_color, "weight": "bold"}, {"weight": "bold"}],
+            size=9,
+        )
+
+        ax_text(
+            x="2021-04-01",
+            y=1.5,
+            s="<Japan> has maintained a very low unemployment\nrate during the entire period.",
+            highlight_textprops=[{"color": japan_color, "weight": "bold"}],
+            size=9,
+        )
+
+        # Add titles and subtitles
+        fig.text(x=0.5, y=0.94, s="Unemployment rates during COVID-19", ha="center", size=18)
+        fig.text(
+            x=0.5,
+            y=0.9,
+            s="From January 2020 to December 2023",
+            color="#b9b9b9",
+            weight="light",
+            ha="center",
+            size=10,
+        )
+
+        # Display the plot in Streamlit
+        st.pyplot(fig)
+
+    # 2. Reproduce another chart
+    with st.expander("Reproduce Another Chart"):
+
+        # Load the data
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/economic/economic.csv"
+        df = pd.read_csv(url)
+
+        # Filter data for the chosen date
+        chosen_date = "2020-04-01"
+        df = df[df["date"] == chosen_date]
+        df = df.sort_values("date")
+
+        # Create the figure and axis
+        fig, ax = plt.subplots()
+        fig.set_facecolor("#3f3f3f")
+        ax.set_facecolor("#3f3f3f")
+
+        # Scatter plot for consumer confidence vs unemployment rate
+        ax.scatter(
+            df["consumer confidence"],
+            df["unemployment rate"],
+            s=300,
+            edgecolor="white",
+            color="#a2a2bf",
+        )
+
+        # Add country labels to the plot
+        for country in df["country"].unique():
+            x = df.loc[df["country"] == country, "consumer confidence"].values[0]
+            y = df.loc[df["country"] == country, "unemployment rate"].values[0]
+            ax.text(x=x + 6, y=y - 0.5, s=country.title(), va="center", color="white")
+
+        # Add arrows using drawarrow
+        ax_arrow([-61, 1.5], [130, 1.5], color="white", fill_head=False)
+        ax_arrow([-60, 1.4], [-60, 15], color="white", fill_head=False)
+
+        # Hide axis spines and customize ticks
+        ax.spines[["bottom", "left", "top", "right"]].set_visible(False)
+        ax.tick_params(size=0, pad=-8, labelsize=9, labelcolor="white")
+
+        # Add axis labels
+        ax.text(x=100, y=2, s="Consumer confidence", color="#d9d9d9", size=6, style="italic")
+        ax.text(x=-55, y=14, s="Unemployment rates", color="#d9d9d9", size=6, style="italic")
+
+        # Add title
+        ax.text(
+            x=35,
+            y=16,
+            s="Unemployment rates and Consumer confidence\nduring peak COVID (April 2020)",
+            ha="center",
+            weight="bold",
+            size=12,
+            color="white",
+        )
+
+        # Display the plot in Streamlit
+        st.pyplot(fig)
+
+    # 3. Improve a chart
+    with st.expander("Improve a Chart"):
+        # Load the dataset
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/game-sales/game-sales.csv"
+        df = pd.read_csv(url)
+
+        # Filter top 10 best-selling games globally
+        top_10 = df.sort_values(by='Global_Sales', ascending=False).head(10)
+
+        # Define colors
+        highlight_color = "#ff6347"
+        default_color = "#b6b6b6"
+
+        # Create the figure and axis
+        fig, ax = plt.subplots(figsize=(12, 8))
+        ax.set_facecolor("#f0f0f0")
+        fig.set_facecolor("#f0f0f0")
+
+        # Plot the bar chart
+        ax.barh(top_10['Name'], top_10['Global_Sales'], color=default_color, edgecolor='black')
+
+        # Highlight the top-selling game
+        ax.barh(top_10.iloc[0]['Name'], top_10.iloc[0]['Global_Sales'], color=highlight_color, edgecolor='black')
+
+        # Add annotation for the top-selling game
+        ax_text(
+            x=top_10.iloc[0]['Global_Sales'] - 5,
+            y=0,
+            s=f"The top-selling game is <{top_10.iloc[0]['Name']}> with <{top_10.iloc[0]['Global_Sales']}M> copies sold globally.",
+            highlight_textprops=[{"color": highlight_color, "weight": "bold"}, {"weight": "bold"}],
+            size=10,
+        )
+
+        # Add custom arrows
+        ax_arrow([50, 0.5], [82, 0.5], color=highlight_color, fill_head=True)
+
+        # Titles and axis customization
+        ax.set_title("Top 10 Best-Selling Video Games Globally", fontsize=16, weight='bold')
+        ax.set_xlabel("Global Sales (in millions)", fontsize=12)
+        ax.tick_params(axis='y', labelsize=10)
+        ax.spines[['top', 'right']].set_visible(False)
+
+        plt.tight_layout()
+
+        # Display the plot in Streamlit
+        st.pyplot(fig)
+
+    # 4. Improve another chart
+    with st.expander("Improve Another Chart"):
+        # Load the dataset
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/netflix/netflix.csv"
+        df = pd.read_csv(url)
+
+        # Extract release years and count movies per year
+        year_counts = df['release_year'].value_counts().sort_index()
+
+        # Filter for the last 20+ years
+        recent_years = year_counts[year_counts.index >= 2000]
+
+        # Define colors
+        colors = sns.color_palette("coolwarm", len(recent_years))
+
+        # Create the radial bar chart
+        fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={'projection': 'polar'})
+        ax.set_facecolor("#1f1f1f")
+        fig.set_facecolor("#1f1f1f")
+
+        # Define theta (angles) and radii (bar lengths)
+        theta = [i / float(len(recent_years)) * 2 * 3.1415 for i in range(len(recent_years))]
+        radii = recent_years.values
+
+        # Plot the bars
+        bars = ax.bar(theta, radii, width=0.3, color=colors, edgecolor='black', alpha=0.8)
+
+        # Highlight the year with the maximum number of movies
+        max_idx = radii.argmax()
+        ax_arrow([theta[max_idx], radii[max_idx] + 5], [theta[max_idx], radii[max_idx]], color='white', fill_head=True)
+
+        # Add annotation
+        ax.text(
+            theta[max_idx], radii[max_idx] + 8,
+            f"Peak in {recent_years.index[max_idx]} with {radii[max_idx]} movies",
+            ha='center', color='white', weight='bold'
+        )
+
+        # Customize grid and labels
+        ax.set_xticks(theta)
+        ax.set_xticklabels(recent_years.index, color='white', fontsize=12)
+        ax.set_yticklabels([])
+        ax.spines['polar'].set_visible(False)
+
+        # Add title
+        ax.set_title("Netflix Movies Released Per Year (2000-2023)", fontsize=16, color='white', weight='bold')
+
+        # Display the plot in Streamlit
+        st.pyplot(fig)
+
 
 css = '''
     <style>

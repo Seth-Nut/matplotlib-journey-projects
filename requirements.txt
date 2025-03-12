@@ -1,4 +1,9 @@
 streamlit
 pandas
+geopandas
 matplotlib
-numpy
+pyogrio
+cartopy
+pypalettes
+highlight-text
+drawarrow

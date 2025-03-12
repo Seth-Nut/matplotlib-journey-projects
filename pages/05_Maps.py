@@ -1,5 +1,4 @@
 # 05 Maps
-
 import streamlit as st
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -112,73 +111,73 @@ Once you've crafted a chart, click the `publish` button and share the graph's UR
 with tab_solution:
     st.markdown("""## Solution""")
 
-# Load the world map
-url_world = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zip"
-world = gpd.read_file(url_world)
-
-# Load the CO2 dataset
-url_co2 = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/CO2/CO2.csv"
-df = pd.read_csv(url_co2)
-
-# Merge datasets
-merged = world.merge(df, how="left", left_on="ADM0_A3", right_on="ISO")
-
-# Choropleth Map
-with st.expander("Choropleth Map"):
-    fig, ax = plt.subplots(1, 1, figsize=(15, 10))
-    merged.plot(
-        column='Total',
-        cmap='Blues',
-        linewidth=0.8,
-        ax=ax,
-        edgecolor='0.8',
-        legend=True
-    )
-    ax.set_title('CO2 Emissions Per Capita (2021)', fontdict={'fontsize': 20})
-    ax.set_axis_off()
-    cax = plt.gcf().axes[-1]
-    cax.set_position([0.85, 0.3, 0.03, 0.4])
-    st.pyplot(fig)
-
-# Bubble Map
-with st.expander("Bubble Map"):
-    merged = merged[~merged['Total'].isnull()]
-    merged["Longitude"] = merged.geometry.centroid.x
-    merged["Latitude"] = merged.geometry.centroid.y
-
-    projection = ccrs.Mercator()
-    previous_proj = ccrs.PlateCarree()
-
-    new_coords = projection.transform_points(
-        previous_proj,
-        merged["Longitude"],
-        merged["Latitude"]
-    )
-
-    x = new_coords[:, 0]  # Transformed longitudes
-    y = new_coords[:, 1]  # Transformed latitudes
-
-    min_s = 10
-    max_s = 1000
-    s = merged["Total"]
-    s = min_s + (s - s.min()) * (max_s - min_s) / (s.max() - s.min())
-
-    fig, ax = plt.subplots(
-        subplot_kw={"projection": projection},
-        figsize=(15, 10),
-        layout="tight"
-    )
-
-    world.boundary.plot(ax=ax, linewidth=0.5, color="black", transform=previous_proj)
-    ax.scatter(x, y, s=s, alpha=0.6, color='dodgerblue', edgecolor='k', linewidth=0.5)
-    ax.set_title('CO2 Emissions Bubble Map (2021)', fontdict={'fontsize': 20})
-    ax.axis("off")
-
-    for size in [10, 50, 100]:
-        plt.scatter([], [], c='dodgerblue', alpha=0.6, s=size, label=str(size // 100) + ' CO2 Units')
-    plt.legend(scatterpoints=1, frameon=False, labelspacing=1, title="Bubble Size")
-
-    st.pyplot(fig)
+    # Load the world map
+    url_world = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zip"
+    world = gpd.read_file(url_world)
+    
+    # Load the CO2 dataset
+    url_co2 = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/CO2/CO2.csv"
+    df = pd.read_csv(url_co2)
+    
+    # Merge datasets
+    merged = world.merge(df, how="left", left_on="ADM0_A3", right_on="ISO")
+    
+    # Choropleth Map
+    with st.expander("Choropleth Map"):
+        fig, ax = plt.subplots(1, 1, figsize=(15, 10))
+        merged.plot(
+            column='Total',
+            cmap='Blues',
+            linewidth=0.8,
+            ax=ax,
+            edgecolor='0.8',
+            legend=True
+        )
+        ax.set_title('CO2 Emissions Per Capita (2021)', fontdict={'fontsize': 20})
+        ax.set_axis_off()
+        cax = plt.gcf().axes[-1]
+        cax.set_position([0.85, 0.3, 0.03, 0.4])
+        st.pyplot(fig)
+    
+    # Bubble Map
+    with st.expander("Bubble Map"):
+        merged = merged[~merged['Total'].isnull()]
+        merged["Longitude"] = merged.geometry.centroid.x
+        merged["Latitude"] = merged.geometry.centroid.y
+    
+        projection = ccrs.Mercator()
+        previous_proj = ccrs.PlateCarree()
+    
+        new_coords = projection.transform_points(
+            previous_proj,
+            merged["Longitude"],
+            merged["Latitude"]
+        )
+    
+        x = new_coords[:, 0]  # Transformed longitudes
+        y = new_coords[:, 1]  # Transformed latitudes
+    
+        min_s = 10
+        max_s = 1000
+        s = merged["Total"]
+        s = min_s + (s - s.min()) * (max_s - min_s) / (s.max() - s.min())
+    
+        fig, ax = plt.subplots(
+            subplot_kw={"projection": projection},
+            figsize=(15, 10),
+            layout="tight"
+        )
+    
+        world.boundary.plot(ax=ax, linewidth=0.5, color="black", transform=previous_proj)
+        ax.scatter(x, y, s=s, alpha=0.6, color='dodgerblue', edgecolor='k', linewidth=0.5)
+        ax.set_title('CO2 Emissions Bubble Map (2021)', fontdict={'fontsize': 20})
+        ax.axis("off")
+    
+        for size in [10, 50, 100]:
+            plt.scatter([], [], c='dodgerblue', alpha=0.6, s=size, label=str(size // 100) + ' CO2 Units')
+        plt.legend(scatterpoints=1, frameon=False, labelspacing=1, title="Bubble Size")
+    
+        st.pyplot(fig)
 
 
 css = '''

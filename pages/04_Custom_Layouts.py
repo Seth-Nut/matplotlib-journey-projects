@@ -1,6 +1,10 @@
 # 04 Custom Layouts
-
 import streamlit as st
+import matplotlib.pyplot as plt
+import pandas as pd
+from pypalettes import load_cmap
+from highlight_text import ax_text, fig_text
+
 
 st.set_page_config(
     page_title="Custom Layouts",
@@ -289,11 +293,290 @@ df = pd.read_csv(open_url(url))
 
         """)
 
+    st.markdown("### 🎮 Your Turn!")
+
+    # 1. Reproduce a chart 
+    with st.expander("Reproduce a Chart"):
+        st.markdown("""
+        **Dataset:** Video Games  
+                    
+        **Instructions:**      
+        - Sometimes, you may need to create charts with **extreme aspect ratios**, as shown here.
+        - Notice that both charts share the **same X-axis limits**, enabling a quick comparison between the two datasets. You can achieve this using the `set_xlim` function.
+        """)
+
+    # 2. Small multiple with title in the middle
+    with st.expander("Small multiple with title in the middle"):
+        st.markdown("""
+        **Dataset:** Natural Disasters
+                    
+        **Instructions:** 
+        - Mastering small multiples is essential for effective data visualization. This technique enhances clarity by organizing data into separate, easily comparable panels.
+        - Use the `subplots_adjust` function to add space between rows, making room for titles and improving readability.
+        """)
+
+    # 3. Partial small multiple
+    with st.expander("Partial small multiple"):
+        st.markdown("""
+        **Dataset:** Economic Measures
+                    
+        **Instructions:** 
+        -Small multiples are a powerful dataviz technique.
+        -Instead of overcrowding a single chart with all groups, splitting them into separate panels makes comparisons clearer and more insightful.
+        """)
 
 
 
 with tab_solution:
     st.markdown("""## Solution""")
+    # 1. Reproduce a chart 
+    with st.expander("Reproduce a Chart"):
+        # Load the dataset
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/game-sales/game-sales.csv"
+        df = pd.read_csv(url)
+
+        # Data Cleaning and Grouping
+        df = df.replace({
+            "Konami Digital Entertainment": "Konami",
+            "Take-Two Interactive": "Take-Two",
+            "Sony Computer Entertainment": "Sony",
+            "Microsoft Game Studios": "Microsoft",
+            "Virgin Interactive": "Virgin",
+            "Eidos Interactive": "Eidos",
+            "Acclaim Entertainment": "Acclaim",
+            "Namco Bandai Games": "Namco",
+        })
+
+        # Group data for 1990s
+        df1990 = df[(df["Year"] >= 1990) & (df["Year"] < 2000)]
+        df1990 = (
+            df1990.groupby("Publisher", as_index=False)["Global_Sales"]
+            .sum()
+            .sort_values("Global_Sales", ascending=False)[:10]
+            .reset_index()
+            .drop("index", axis=1)
+        )
+
+        # Group data for 2000s
+        df2000 = df[(df["Year"] >= 2000) & (df["Year"] < 2010)]
+        df2000 = (
+            df2000.groupby("Publisher", as_index=False)["Global_Sales"]
+            .sum()
+            .sort_values("Global_Sales", ascending=False)[:10]
+            .reset_index()
+            .drop("index", axis=1)
+        )
+
+        # Load color palette
+        colors = load_cmap("Antique").colors
+        col1, col2 = colors[0], colors[1]
+
+        # Create the figure
+        fig, axs = plt.subplots(nrows=2, figsize=(5, 9))
+        fig.subplots_adjust(hspace=0.07, top=0.85)
+
+        # Plot for 1990s
+        axs[0].barh(df1990["Publisher"], df1990["Global_Sales"], color=col1)
+        axs[0].set_xticks([0, 200, 400, 600, 800], labels=["", "", "", "", ""])
+        ax_text(
+            x=200,
+            y=8,
+            s="Overall sales during the <90s>",
+            ax=axs[0],
+            highlight_textprops=[{"color": col1, "weight": "bold"}],
+        )
+
+        # Plot for 2000s
+        axs[1].barh(df2000["Publisher"], df2000["Global_Sales"], color=col2)
+        axs[1].set_xticks([200, 400, 600, 800], labels=["200M", "400M", "600M", "800M"], size=8)
+        ax_text(
+            x=200,
+            y=8,
+            s="Overall sales during the <2000s>",
+            ax=axs[1],
+            highlight_textprops=[{"color": col2, "weight": "bold"}],
+        )
+
+        # Customizing the subplots
+        for ax in axs:
+            ax.set_xlim(0, 890)
+            ax.spines[["top", "right", "left"]].set_visible(False)
+            ax.grid(axis="x", color="grey", lw=0.5, alpha=0.3, zorder=-1)
+            ax.tick_params(length=0)
+            ax.set_yticks([])
+
+        # Adding text labels
+        for i, row in df1990.iterrows():
+            company = row["Publisher"]
+            value = row["Global_Sales"]
+            axs[0].text(x=value + 10, y=i, s=company, va="center", size=7)
+
+        for i, row in df2000.iterrows():
+            company = row["Publisher"]
+            axs[1].text(x=7, y=i, s=company, va="center", size=7)
+
+        # Adding a global title
+        fig.text(x=0.5, y=0.88, s="Video games Sales by major publishers", ha="center", size=14)
+
+        # Display the plot in Streamlit
+        st.pyplot(fig)
+
+    # 2. Small multiple with title in the middle
+    with st.expander("Small multiple with title in the middle"):
+
+
+        # Load the dataset
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/natural-disasters/natural-disasters.csv"
+        df = pd.read_csv(url)
+
+        # Drop less relevant columns
+        df = df.drop(columns=["Volcanic activity", "Wildfire"])
+
+        # Load color palette
+        colors = load_cmap("Antique").colors
+
+        # Define events for visualization
+        events = [
+            "Flood",
+            "Extreme weather",
+            "Earthquake",
+            "Extreme temperature",
+            "Drought",
+            "Wet mass movement",
+        ]
+
+        # Create subplots
+        fig, axs = plt.subplots(ncols=3, nrows=2, figsize=(10, 6))
+        fig.subplots_adjust(hspace=0.5)
+
+        # Plot data for each event
+        for ax, event, color in zip(axs.flat, events, colors):
+            for sub_event in events:
+                ax.plot(
+                    df["Year"], df[sub_event], color="grey", alpha=0.2, zorder=1, linewidth=0.7
+                )
+
+            # Highlight the main event in each subplot
+            ax.plot(df["Year"], df[event], color=color, zorder=5, linewidth=0.9)
+            ax.spines[["top", "right"]].set_visible(False)
+            ax.tick_params(length=0, labelsize=6)
+            ax.set_ylim(0, 235)
+            ax.set_xlim(1960, 2023)
+            ax.text(x=1962, y=150, s=event.title(), size=9, color=color, weight="bold")
+
+            # Customize y-axis
+            if event not in ["Flood", "Extreme temperature"]:
+                ax.spines["left"].set_visible(False)
+                ax.set_yticks([])
+            else:
+                ax.set_yticks([50, 100, 150, 200])
+
+            # Customize x-axis
+            if event not in ["Extreme temperature", "Drought", "Wet mass movement"]:
+                ax.set_xticks([])
+
+        # Add overall annotation using fig_text
+        fig_text(
+            x=0.5,
+            y=0.53,
+            s="<Flood> and <Extreme Weather> are the most\nfrequent natural disasters since the 60s.",
+            size=13,
+            weight="bold",
+            ha="center",
+            highlight_textprops=[
+                {"color": colors[0]},
+                {"color": colors[1]},
+            ],
+        )
+
+        # Display the plot in Streamlit
+        st.pyplot(fig)
+
+
+    # 3. Partial small multiple
+    with st.expander("Partial small multiple"):
+        # Load the dataset
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/economic/economic.csv"
+        df = pd.read_csv(url)
+        
+        # Data Cleaning and Transformation
+        df = df[~df["country"].isin(["europe", "new zealand"])]
+        df["country"] = df["country"].replace({"united states": "US", "united kingdom": "UK"})
+        df["date"] = pd.to_datetime(df["date"])
+        df = df.sort_values("date")
+        
+        # Define colors and styles
+        grey_lines_color = "#7c7c7c"
+        background_color = "#191c3b"
+        color_mapping = {
+            "china": "#e84f4f",
+            "switzerland": "#4bcf82",
+            "japan": "#de5fee",
+            "australia": "#786cf3",
+        }
+        
+        # Create the figure and subplots
+        fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(10, 10))
+        fig.set_facecolor(background_color)
+        
+        # Loop through each subplot and country
+        for ax in axs.flat:
+            for country in df["country"].unique():
+                subset = df[df["country"] == country]
+                x = subset["date"]
+                y = subset["interest rates"]
+        
+                last_date = x.values[-1] + pd.Timedelta(days=25)
+                last_value = y.values[-1]
+        
+                # Define styles based on country and subplot
+                if country == "china" and ax == axs[0, 0]:
+                    text_style = dict(color=color_mapping[country])
+                    plot_style = dict(zorder=5, linewidth=2, color=color_mapping[country])
+        
+                elif country == "switzerland" and ax == axs[0, 1]:
+                    text_style = dict(color=color_mapping[country])
+                    plot_style = dict(zorder=5, linewidth=2, color=color_mapping[country])
+        
+                elif country == "japan" and ax == axs[1, 0]:
+                    text_style = dict(color=color_mapping[country])
+                    plot_style = dict(zorder=5, linewidth=2, color=color_mapping[country])
+        
+                elif country == "australia" and ax == axs[1, 1]:
+                    text_style = dict(color=color_mapping[country])
+                    plot_style = dict(zorder=5, linewidth=2, color=color_mapping[country])
+        
+                else:
+                    text_style = dict(color=grey_lines_color)
+                    plot_style = dict(color=grey_lines_color)
+        
+                # Plotting
+                ax.plot(x, y, **plot_style)
+                ax.text(x=last_date, y=last_value, s=country.upper(), va="center", **text_style)
+        
+                # Customize the x-axis
+                ax.set_xticks(["2020-01-01", "2022-01-01", "2024-01-01"], labels=[2020, 2022, 2024])
+                ax.tick_params(length=3, labelcolor="#c3c3c3", labelsize=8, color="white")
+        
+                # Customize spines and background
+                ax.spines[["top", "right"]].set_visible(False)
+                ax.spines[["top", "right", "left", "bottom"]].set_color("white")
+                ax.set_facecolor(background_color)
+        
+        # Hide left spine and y-ticks for certain subplots
+        axs[0, 1].spines["left"].set_visible(False)
+        axs[1, 1].spines["left"].set_visible(False)
+        axs[0, 1].set_yticks([])
+        axs[1, 1].set_yticks([])
+        
+        # Add main title
+        fig.text(
+            x=0.13, y=0.92, s="Interest Rates, from 2020 to 2024",
+            size=18, color="#e2e2e2"
+        )
+        
+        # Display the plot in Streamlit
+        st.pyplot(fig)
 
 css = '''
     <style>

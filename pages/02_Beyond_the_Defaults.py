@@ -1,10 +1,11 @@
 # 02 Beyond The Defaults
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from pypalettes import load_cmap
+
 
 st.set_page_config(
     page_title="Beyond the defaults",
@@ -162,120 +163,234 @@ To spark your curiosity, here is a non-exhaustive list of compelling questions y
 
         """)
 
+    st.markdown("### 🎮 Your Turn!")
+
+    # 1. Reproduce a chart 
+    with st.expander("Reproduce a Chart"):
+        st.markdown("""
+        **Dataset:** Natural Disasters  
+        **Instructions:**
+        - Use the [Antique palette](https://python-graph-gallery.com/color-palette-finder/?palette=antique) from `pypalettes`.
+        - Shift the y-axis from the left to the right using `ax.yaxis.tick_right()`.
+        - For the legend, add `labels=columns` in the plotting function and call `ax.legend(reverse=True, loc=\"center left\")`.
+        """)
+
+    # 2. Reproduce another chart 
+    with st.expander("Reproduce Another Chart"):
+        st.markdown("""
+        **Dataset:** New York Airbnb  
+        - No special instructions are needed for this chart.  
+        - The challenge is to add labels with the correct formatting.
+        """)
+
+    # 3. Improve a chart
+    with st.expander("Improve a Chart"):
+        st.markdown("""
+        *(Complete details here)*
+        """)
+
+    # 4. Improve another chart
+    with st.expander("Improve Another Chart"):
+        st.markdown("""
+        *(Complete details here)*
+        """)
+
 
 with tab_solution:
     st.markdown("""## Solution""")
-
-        
-    # Tab menu
-    tab1, tab2, tab3 = st.tabs(
-        ["Natural disasters", "Wine quality", "New York Airbnb"] 
-    )
-
-    with tab1:
-
-        # Load the dataset
+    # 1. Reproduce a chart 
+    with st.expander("Reproduce Natural Disasters Chart"):
         url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/natural-disasters/natural-disasters.csv"
-        df_disasters = pd.read_csv(url)
+        df = pd.read_csv(url)
 
-        # Streamlit layout
-        st.markdown("### 🌪️ Frequency of Natural Disasters")
-        st.markdown(
-            "This dataset is sourced from [EM-DAT](https://www.emdat.be/), the international disaster database."
+        columns = df.drop(columns="Year").sum().sort_values().index.to_list()
+        x = df["Year"]
+        y = np.stack(df[columns].values, axis=-1)
+
+        fig, ax = plt.subplots(figsize=(10, 5))
+
+        # Manually defined antique-like palette
+        antique_palette = ["#8B7E66", "#B29F7E", "#D2B48C", "#F5DEB3", "#FFE4C4"]
+
+        ax.stackplot(x, y, colors=antique_palette, labels=columns)
+        ax.set_xlim(1960, 2023)
+        ax.spines[["top", "left"]].set_visible(False)
+        ax.yaxis.tick_right()
+        ax.text(
+            x=1960,
+            y=380,
+            s="Evolution of natural disasters between 1960 and 2023",
+            size=12,
+        )
+        ax.text(x=1960, y=355, s="Data source: EM-DAT")
+        ax.legend(reverse=True, loc="center left")
+        ax.set_xticks([1960, 1980, 2000, 2020])
+        ax.set_yticks([100, 200, 300, 400])
+        ax.tick_params(length=0, pad=5)
+
+        st.pyplot(fig)
+             
+    # 2. Reproduce another chart 
+    with st.expander("Reproduce New York Airbnb Chart"):
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/newyork-airbnb/newyork-airbnb.csv"
+        df = pd.read_csv(url)
+
+        df_agg = (
+            df["neighbourhood"]
+            .value_counts()
+            .head(10)
+            .to_frame(name="count")
+            .reset_index()
+            .rename(columns={"index": "neighbourhood"})
+            .sort_values("count")
+        )
+        labels = df_agg["neighbourhood"]
+        values = df_agg["count"]
+
+        fig, ax = plt.subplots(layout="tight")
+
+        color_mapping = {True: "#2d8653", False: "#d6d6d6"}
+        colors = labels == "Williamsburg"
+        colors = colors.map(color_mapping)
+
+        ax.barh(labels, values, color=colors)
+        ax.set_xticks([])
+        ax.spines[["top", "right", "left", "bottom"]].set_visible(False)
+        ax.tick_params(length=0)
+
+        ax.text(
+            x=3920 / 2,
+            y=10.5,
+            s="New York neighbourhood with the most Airbnbs",
+            ha="center",
+            va="top",
+            size=14,
         )
 
-        # Dropdown menu for selecting the question
-        selected_question = st.radio(
-            "Select a question to explore the data:",
-            (
-                "Which years saw the highest number of reported storms?",
-                "What type of storm occurs most frequently, and does this change over time?",
-                "Are there years that display notable patterns?",
-                "Is there a discernible trend?",
-                "Which decade stands out as the worst in terms of natural disasters?",
-            ),
+        for i in range(len(values)):
+            value = values[i]
+            color = "white" if i == 0 else "black"
+            format_value = f"{value / 1000:.1f}k"
+            ax.text(
+                x=value - 350, y=len(values) - 1 - i, s=format_value, va="center", color=color
+            )
+
+        st.pyplot(fig)
+
+    # 3. Improve a chart
+    with st.expander("Improve a Chart"):
+        # Load the dataset
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/wine/wine.csv"
+        df = pd.read_csv(url)
+
+        # Select only numeric columns
+        df_numeric = df.select_dtypes(include=[np.number])
+
+        # Compute the correlation matrix
+        corr = df_numeric.corr()
+
+        # Create a mask for the upper triangle
+        mask = np.triu(np.ones_like(corr, dtype=bool))
+
+
+        # Create a custom diverging color palette
+        cmap = sns.diverging_palette(240, 10, as_cmap=True)
+
+        # Plot the heatmap
+        fig, ax = plt.subplots(figsize=(12, 10))
+        sns.heatmap(
+            corr,
+            mask=mask,
+            cmap=cmap,
+            vmax=1,
+            vmin=-1,
+            center=0,
+            annot=True,
+            fmt=".2f",
+            square=True,
+            linewidths=.5,
+            cbar_kws={"shrink": .75, "label": "Correlation"},
+            annot_kws={"size": 12, "weight": "bold", "color": "black"},
+            ax=ax
         )
 
-        # 1. Which years saw the highest number of reported storms?
-        if selected_question == "Which years saw the highest number of reported storms?":
-            total_disasters_year = df_disasters.iloc[:, 1:].sum(axis=1)
-            top_years = total_disasters_year.nlargest(10).sort_values(ascending=False)
-            fig1, ax1 = plt.subplots(figsize=(5, 3))  # Smaller size
-            ax1.bar(top_years.index, top_years.values, color="blue", edgecolor="black")
-            ax1.set_title("Top Years with Highest Number of Reported Storms")
-            ax1.set_xlabel("Year")
-            ax1.set_ylabel("Total Disasters")
-            st.pyplot(fig1, use_container_width=True)
+        # Set title and layout
+        ax.set_title("Wine Correlation Heatmap", fontsize=18, weight='bold', pad=20)
+        plt.xticks(rotation=45, ha='right', fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.tight_layout()
 
-        # 2. What type of storm occurs most frequently, and does this change over time?
-        elif selected_question == "What type of storm occurs most frequently, and does this change over time?":
-            total_by_type = df_disasters.iloc[:, 1:].sum()
-            fig2, ax2 = plt.subplots(figsize=(5, 3))  # Smaller size
-            ax2.bar(total_by_type.index, total_by_type.values, color="green", edgecolor="black")
-            ax2.set_title("Most Frequent Storm Types")
-            ax2.set_xlabel("Storm Type")
-            ax2.set_ylabel("Total Occurrences")
-            st.pyplot(fig2, use_container_width=True)
-            st.write("The chart above shows the most frequent storm types overall.")
+        # Display the heatmap in Streamlit
+        st.pyplot(fig)
 
-            # Trends over time for each storm type
-            fig3, ax3 = plt.subplots(figsize=(6, 3))  # Smaller size
-            for disaster_type in df_disasters.columns[1:]:
-                ax3.plot(
-                    df_disasters["Year"],
-                    df_disasters[disaster_type],
-                    label=disaster_type,
-                    marker="o",
-                    markersize=4,
-                    linewidth=1.5,
-                )
-            ax3.set_title("Trends of Storm Types Over Time")
-            ax3.set_xlabel("Year")
-            ax3.set_ylabel("Number of Occurrences")
-            ax3.legend(fontsize="small")
-            st.pyplot(fig3, use_container_width=True)
+    # 4. Improve another chart
+    with st.expander("Improve Another Chart"):
 
-        # 3. Are there years that display notable patterns?
-        elif selected_question == "Are there years that display notable patterns?":
-            fig4, ax4 = plt.subplots(figsize=(6, 3))  # Smaller size
-            disaster_pivot = df_disasters.set_index("Year").T
-            sns.heatmap(
-                disaster_pivot,
-                cmap="coolwarm",
-                annot=False,
-                ax=ax4,
-                cbar_kws={"label": "Occurrences"},
-            )
-            ax4.set_title("Heatmap of Disaster Occurrences by Year and Type")
-            st.pyplot(fig4, use_container_width=True)
+        # Load data
+        url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/wine/wine.csv"
+        df = pd.read_csv(url)
 
-        # 4. Is there a discernible trend?
-        elif selected_question == "Is there a discernible trend?":
-            total_disasters_year = df_disasters.iloc[:, 1:].sum(axis=1)
-            fig5, ax5 = plt.subplots(figsize=(5, 3))  # Smaller size
-            ax5.plot(
-                df_disasters["Year"],
-                total_disasters_year,
-                marker="o",
-                color="purple",
-                linewidth=1.5,
-            )
-            ax5.set_title("Trend of Total Natural Disasters Over Time")
-            ax5.set_xlabel("Year")
-            ax5.set_ylabel("Total Disasters")
-            st.pyplot(fig5, use_container_width=True)
+        # Compute correlations and select the top correlated feature with 'quality'
+        corr = df.corr(numeric_only=True)
+        sorted_corr = corr['quality'].sort_values(ascending=False)
+        best_feature = sorted_corr.index[1]
 
-        # 5. Which decade stands out as the worst in terms of natural disasters?
-        elif selected_question == "Which decade stands out as the worst in terms of natural disasters?":
-            df_disasters["Decade"] = (df_disasters["Year"] // 10) * 10
-            total_by_decade = df_disasters.groupby("Decade").sum().iloc[:, :-1].sum(axis=1)
-            fig6, ax6 = plt.subplots(figsize=(5, 3))  # Smaller size
-            ax6.bar(total_by_decade.index, total_by_decade.values, color="red", edgecolor="black")
-            ax6.set_title("Total Disasters Per Decade")
-            ax6.set_xlabel("Decade")
-            ax6.set_ylabel("Total Disasters")
-            st.pyplot(fig6, use_container_width=True)
+        # Define a custom palette with enough colors
+        unique_qualities = df['quality'].nunique()
+        custom_palette = sns.color_palette("coolwarm", n_colors=unique_qualities)
 
+        # Create the figure
+        fig, ax = plt.subplots(figsize=(14, 8))
+
+        # Create the violin plot with 'hue'
+        sns.violinplot(
+            x='quality',
+            y=best_feature,
+            data=df,
+            hue='quality',
+            palette=custom_palette,
+            inner=None,
+            linewidth=2,
+            saturation=0.9,
+            ax=ax,
+            legend=False  # Disable the redundant hue legend
+        )
+
+        # Add custom annotations for median values
+        medians = df.groupby('quality')[best_feature].median()
+        for i, median in enumerate(medians):
+            ax.text(i, median + 0.02, f'{median:.2f}', ha='center', va='center', 
+                    fontweight='bold', fontsize=12, color='black', 
+                    bbox=dict(facecolor='white', alpha=0.6, boxstyle='round,pad=0.3'))
+
+        # Highlight max and min points for each quality score
+        grouped = df.groupby('quality')[best_feature]
+        max_points = grouped.max()
+        min_points = grouped.min()
+
+        ax.scatter(max_points.index - 1, max_points.values, color='green', label='Max', s=100, marker='^', edgecolor='k')
+        ax.scatter(min_points.index - 1, min_points.values, color='red', label='Min', s=100, marker='v', edgecolor='k')
+
+        # Customize grid and borders
+        ax.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_linewidth(1.2)
+            spine.set_edgecolor('gray')
+
+        # Titles and axis labels
+        ax.set_title(f"Enhanced Distribution of '{best_feature}' Across Wine Quality Scores", fontsize=18, weight='bold', pad=20)
+        ax.set_xlabel("Wine Quality (Score)", fontsize=14, weight='bold')
+        ax.set_ylabel(f"{best_feature.capitalize()} Value", fontsize=14, weight='bold')
+
+        # Add legend
+        ax.legend(title="Highlights", fontsize=12)
+
+        # Final layout adjustment
+        plt.tight_layout()
+
+        # Display the plot in Streamlit
+        st.pyplot(fig)
 
 css = '''
     <style>
