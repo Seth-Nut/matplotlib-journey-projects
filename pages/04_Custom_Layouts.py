@@ -321,8 +321,8 @@ df = pd.read_csv(open_url(url))
         **Dataset:** Economic Measures
                     
         **Instructions:** 
-        -Small multiples are a powerful dataviz technique.
-        -Instead of overcrowding a single chart with all groups, splitting them into separate panels makes comparisons clearer and more insightful.
+        - Small multiples are a powerful dataviz technique.
+        - Instead of overcrowding a single chart with all groups, splitting them into separate panels makes comparisons clearer and more insightful.
         """)
 
 
@@ -498,13 +498,13 @@ with tab_solution:
         # Load the dataset
         url = "https://raw.githubusercontent.com/JosephBARBIERDARNAL/data-matplotlib-journey/refs/heads/main/economic/economic.csv"
         df = pd.read_csv(url)
-        
+
         # Data Cleaning and Transformation
         df = df[~df["country"].isin(["europe", "new zealand"])]
         df["country"] = df["country"].replace({"united states": "US", "united kingdom": "UK"})
         df["date"] = pd.to_datetime(df["date"])
         df = df.sort_values("date")
-        
+
         # Define colors and styles
         grey_lines_color = "#7c7c7c"
         background_color = "#191c3b"
@@ -514,67 +514,67 @@ with tab_solution:
             "japan": "#de5fee",
             "australia": "#786cf3",
         }
-        
+
         # Create the figure and subplots
         fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(10, 10))
         fig.set_facecolor(background_color)
-        
+
         # Loop through each subplot and country
         for ax in axs.flat:
             for country in df["country"].unique():
                 subset = df[df["country"] == country]
                 x = subset["date"]
                 y = subset["interest rates"]
-        
+
                 last_date = x.values[-1] + pd.Timedelta(days=25)
                 last_value = y.values[-1]
-        
+
                 # Define styles based on country and subplot
                 if country == "china" and ax == axs[0, 0]:
                     text_style = dict(color=color_mapping[country])
                     plot_style = dict(zorder=5, linewidth=2, color=color_mapping[country])
-        
+
                 elif country == "switzerland" and ax == axs[0, 1]:
                     text_style = dict(color=color_mapping[country])
                     plot_style = dict(zorder=5, linewidth=2, color=color_mapping[country])
-        
+
                 elif country == "japan" and ax == axs[1, 0]:
                     text_style = dict(color=color_mapping[country])
                     plot_style = dict(zorder=5, linewidth=2, color=color_mapping[country])
-        
+
                 elif country == "australia" and ax == axs[1, 1]:
                     text_style = dict(color=color_mapping[country])
                     plot_style = dict(zorder=5, linewidth=2, color=color_mapping[country])
-        
+
                 else:
                     text_style = dict(color=grey_lines_color)
                     plot_style = dict(color=grey_lines_color)
-        
+
                 # Plotting
                 ax.plot(x, y, **plot_style)
                 ax.text(x=last_date, y=last_value, s=country.upper(), va="center", **text_style)
-        
+
                 # Customize the x-axis
                 ax.set_xticks(["2020-01-01", "2022-01-01", "2024-01-01"], labels=[2020, 2022, 2024])
                 ax.tick_params(length=3, labelcolor="#c3c3c3", labelsize=8, color="white")
-        
+
                 # Customize spines and background
                 ax.spines[["top", "right"]].set_visible(False)
                 ax.spines[["top", "right", "left", "bottom"]].set_color("white")
                 ax.set_facecolor(background_color)
-        
+
         # Hide left spine and y-ticks for certain subplots
         axs[0, 1].spines["left"].set_visible(False)
         axs[1, 1].spines["left"].set_visible(False)
         axs[0, 1].set_yticks([])
         axs[1, 1].set_yticks([])
-        
+
         # Add main title
         fig.text(
             x=0.13, y=0.92, s="Interest Rates, from 2020 to 2024",
             size=18, color="#e2e2e2"
         )
-        
+
         # Display the plot in Streamlit
         st.pyplot(fig)
 
