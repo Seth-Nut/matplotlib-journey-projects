@@ -2,6 +2,7 @@ streamlit
 pandas
 geopandas
 matplotlib
+seaborn
 pyogrio
 cartopy
 pypalettes
